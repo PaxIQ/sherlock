@@ -7,6 +7,7 @@ $ErrorActionPreference = "Stop"
 
 $InstallDir = "$env:USERPROFILE\AutomationAudit"
 $PipeDir = "$env:USERPROFILE\.screenpipe\pipes\sherlock"
+$ScreenpipeUrl = "https://github.com/screenpipe/screenpipe/releases/download/cli-latest/screenpipe-0.3.264-x86_64-pc-windows-msvc.zip"
 $PipeUrl = "https://raw.githubusercontent.com/PaxIQ/sherlock/main/pipe/pipe.md"
 
 Write-Host ""
@@ -16,22 +17,42 @@ Write-Host "║                           by PaxIQ                            �
 Write-Host "╚═══════════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
 Write-Host ""
 
-# Check for Node.js (required for npx)
-if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
-    Write-Host "✗ Node.js is required but not installed." -ForegroundColor Red
-    Write-Host "  Install from: https://nodejs.org" -ForegroundColor Yellow
-    Start-Process "https://nodejs.org"
-    exit 1
+# Check if running as admin for Unblock-File
+$isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+if (-not $isAdmin) {
+    Write-Host "⚠ Running without admin privileges. Some features may be limited." -ForegroundColor Yellow
 }
 
-New-Item -ItemType Directory -Force -Path $InstallDir | Out-Null
-
-# Check if screenpipe is already running
-$screenpipeProcess = Get-Process -Name "screenpipe" -ErrorAction SilentlyContinue
-if ($screenpipeProcess) {
-    Write-Host "✓ Screenpipe already running" -ForegroundColor Green
+# Check if screenpipe is installed
+$screenpipeCmd = $null
+if (Get-Command screenpipe -ErrorAction SilentlyContinue) {
+    Write-Host "✓ Screenpipe already installed" -ForegroundColor Green
+    $screenpipeCmd = "screenpipe"
+} elseif (Test-Path "$InstallDir\screenpipe.exe") {
+    Write-Host "✓ Screenpipe already installed" -ForegroundColor Green
+    $screenpipeCmd = "$InstallDir\screenpipe.exe"
 } else {
-    Write-Host "→ Screenpipe will be started via npx..." -ForegroundColor Yellow
+    Write-Host "→ Installing screenpipe..." -ForegroundColor Yellow
+    
+    New-Item -ItemType Directory -Force -Path $InstallDir | Out-Null
+    Set-Location -Path $InstallDir
+    
+    try {
+        Invoke-WebRequest -Uri $ScreenpipeUrl -OutFile "screenpipe.zip" -UseBasicParsing
+    } catch {
+        Write-Host "✗ Failed to download screenpipe. Check your internet connection." -ForegroundColor Red
+        exit 1
+    }
+    
+    Expand-Archive -Path "screenpipe.zip" -DestinationPath "." -Force
+    Remove-Item "screenpipe.zip"
+    
+    # Unblock downloaded files (prevents SmartScreen warnings)
+    Write-Host "→ Unblocking downloaded files..." -ForegroundColor Yellow
+    Get-ChildItem -Path $InstallDir -Recurse | Unblock-File -ErrorAction SilentlyContinue
+    
+    $screenpipeCmd = "$InstallDir\screenpipe.exe"
+    Write-Host "✓ Screenpipe installed to $InstallDir" -ForegroundColor Green
 }
 
 # Check if Ollama is installed
@@ -101,7 +122,7 @@ Remove-Item -Path "$env:USERPROFILE\AutomationAudit" -Recurse -Force -ErrorActio
 Remove-Item -Path "$env:USERPROFILE\.screenpipe\pipes\sherlock" -Recurse -Force -ErrorAction SilentlyContinue
 
 Write-Host "✓ Sherlock uninstalled" -ForegroundColor Green
-Write-Host "Note: Ollama, Node.js, and their data were not removed."
+Write-Host "Note: Ollama and its models were not removed."
 "@
 Set-Content -Path "$InstallDir\uninstall.ps1" -Value $UninstallScript
 
@@ -111,9 +132,9 @@ $screenpipeProcess = Get-Process -Name "screenpipe" -ErrorAction SilentlyContinu
 if ($screenpipeProcess) {
     Write-Host "✓ Screenpipe is already running" -ForegroundColor Green
 } else {
-    Write-Host "→ Starting screenpipe via npx..." -ForegroundColor Yellow
-    Start-Process -FilePath "npx" -ArgumentList "screenpipe@latest", "record" -WindowStyle Hidden
-    Start-Sleep -Seconds 5
+    Write-Host "→ Starting screenpipe..." -ForegroundColor Yellow
+    Start-Process -FilePath $screenpipeCmd -ArgumentList "record" -WindowStyle Hidden
+    Start-Sleep -Seconds 2
     $screenpipeProcess = Get-Process -Name "screenpipe" -ErrorAction SilentlyContinue
     if ($screenpipeProcess) {
         Write-Host "✓ Screenpipe started" -ForegroundColor Green

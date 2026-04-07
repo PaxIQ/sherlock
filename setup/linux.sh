@@ -6,6 +6,7 @@ set -e
 
 INSTALL_DIR="$HOME/.automation_audit"
 PIPE_DIR="$HOME/.screenpipe/pipes/sherlock"
+SCREENPIPE_URL="https://github.com/screenpipe/screenpipe/releases/download/cli-latest/screenpipe-0.3.264-x86_64-unknown-linux-gnu.tar.gz"
 PIPE_URL="https://raw.githubusercontent.com/PaxIQ/sherlock/main/pipe/pipe.md"
 
 echo ""
@@ -15,21 +16,30 @@ echo "║                           by PaxIQ                            ║"
 echo "╚═══════════════════════════════════════════════════════════════╝"
 echo ""
 
-# Check for Node.js (required for npx)
-if ! command -v node &> /dev/null; then
-    echo "✗ Node.js is required but not installed."
-    echo "  Install via: curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash - && sudo apt-get install -y nodejs"
-    echo "  Or visit: https://nodejs.org"
-    exit 1
-fi
-
-mkdir -p "$INSTALL_DIR"
-
-# Check if screenpipe is already installed/running
-if pgrep -f "screenpipe" > /dev/null; then
-    echo "✓ Screenpipe already running"
+# Check if screenpipe is already installed
+if command -v screenpipe &> /dev/null; then
+    echo "✓ Screenpipe already installed"
+    SCREENPIPE_CMD="screenpipe"
+elif [ -f "$INSTALL_DIR/screenpipe" ]; then
+    echo "✓ Screenpipe already installed"
+    SCREENPIPE_CMD="$INSTALL_DIR/screenpipe"
 else
-    echo "→ Screenpipe will be started via npx..."
+    echo "→ Installing screenpipe..."
+    
+    mkdir -p "$INSTALL_DIR"
+    cd "$INSTALL_DIR" || exit 1
+    
+    if ! curl -fSL "$SCREENPIPE_URL" -o screenpipe.tar.gz; then
+        echo "✗ Failed to download screenpipe. Check your internet connection."
+        exit 1
+    fi
+    
+    tar -xzf screenpipe.tar.gz
+    rm screenpipe.tar.gz
+    
+    chmod +x ./screenpipe
+    SCREENPIPE_CMD="$INSTALL_DIR/screenpipe"
+    echo "✓ Screenpipe installed to $INSTALL_DIR"
 fi
 
 # Check if Ollama is installed
@@ -92,7 +102,7 @@ rm -rf "$HOME/.automation_audit"
 rm -rf "$HOME/.screenpipe/pipes/sherlock"
 
 echo "✓ Sherlock uninstalled"
-echo "Note: Ollama, Node.js, and their data were not removed."
+echo "Note: Ollama and its models were not removed."
 UNINSTALL_EOF
 chmod +x "$INSTALL_DIR/uninstall.sh"
 
@@ -101,9 +111,9 @@ echo ""
 if pgrep -f "screenpipe" > /dev/null; then
     echo "✓ Screenpipe is already running"
 else
-    echo "→ Starting screenpipe via npx..."
-    nohup npx screenpipe@latest record > "$INSTALL_DIR/screenpipe.log" 2>&1 &
-    sleep 5
+    echo "→ Starting screenpipe..."
+    nohup $SCREENPIPE_CMD record > "$INSTALL_DIR/screenpipe.log" 2>&1 &
+    sleep 2
     if pgrep -f "screenpipe" > /dev/null; then
         echo "✓ Screenpipe started"
     else

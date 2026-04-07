@@ -44,9 +44,14 @@ else
     tar -xzf screenpipe.tar.gz
     rm screenpipe.tar.gz
     
+    # Binary is in bin/ subdirectory
+    mv ./bin/screenpipe ./screenpipe 2>/dev/null || true
+    mv ./bin/mlx.metallib ./mlx.metallib 2>/dev/null || true
+    rm -rf ./bin 2>/dev/null || true
+    
     # Remove quarantine attribute (required for unsigned binaries)
     echo "→ Removing macOS quarantine attribute (may require password)..."
-    sudo xattr -cr ./screenpipe 2>/dev/null || xattr -cr ./screenpipe
+    sudo xattr -cr . 2>/dev/null || xattr -cr .
     
     chmod +x ./screenpipe
     SCREENPIPE_CMD="$INSTALL_DIR/screenpipe"

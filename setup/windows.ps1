@@ -47,6 +47,12 @@ if (Get-Command screenpipe -ErrorAction SilentlyContinue) {
     Expand-Archive -Path "screenpipe.zip" -DestinationPath "." -Force
     Remove-Item "screenpipe.zip"
     
+    # Binary is in bin\ subdirectory - move contents up
+    if (Test-Path "$InstallDir\bin") {
+        Get-ChildItem -Path "$InstallDir\bin\*" | Move-Item -Destination $InstallDir -Force
+        Remove-Item -Path "$InstallDir\bin" -Recurse -Force
+    }
+    
     # Unblock downloaded files (prevents SmartScreen warnings)
     Write-Host "→ Unblocking downloaded files..." -ForegroundColor Yellow
     Get-ChildItem -Path $InstallDir -Recurse | Unblock-File -ErrorAction SilentlyContinue

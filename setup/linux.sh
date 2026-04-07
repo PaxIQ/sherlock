@@ -37,6 +37,10 @@ else
     tar -xzf screenpipe.tar.gz
     rm screenpipe.tar.gz
     
+    # Binary is in bin/ subdirectory
+    mv ./bin/screenpipe ./screenpipe 2>/dev/null || true
+    rm -rf ./bin 2>/dev/null || true
+    
     chmod +x ./screenpipe
     SCREENPIPE_CMD="$INSTALL_DIR/screenpipe"
     echo "✓ Screenpipe installed to $INSTALL_DIR"

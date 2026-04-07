@@ -1,46 +1,35 @@
 #!/bin/bash
 # Sherlock - Automation Discovery Setup for macOS
-# PaxIQ Consulting
+# PaxIQ
 
 set -e
 
 INSTALL_DIR="$HOME/.automation_audit"
 PIPE_DIR="$HOME/.screenpipe/pipes/sherlock"
-SCREENPIPE_URL="https://github.com/mediar-ai/screenpipe/releases/latest/download/screenpipe-apple-darwin.tar.gz"
 PIPE_URL="https://raw.githubusercontent.com/PaxIQ/sherlock/main/pipe/pipe.md"
 
 echo ""
 echo "╔═══════════════════════════════════════════════════════════════╗"
 echo "║       Sherlock - Automation Discovery Agent (macOS)          ║"
-echo "║                     by PaxIQ Consulting                       ║"
+echo "║                           by PaxIQ                            ║"
 echo "╚═══════════════════════════════════════════════════════════════╝"
 echo ""
 
-# Check if screenpipe is already installed
-if command -v screenpipe &> /dev/null || [ -f "/Applications/screenpipe.app/Contents/MacOS/screenpipe" ]; then
-    echo "✓ Screenpipe already installed"
-    SCREENPIPE_CMD="screenpipe"
+# Check for Node.js (required for npx)
+if ! command -v node &> /dev/null; then
+    echo "✗ Node.js is required but not installed."
+    echo "  Install via Homebrew: brew install node"
+    echo "  Or visit: https://nodejs.org"
+    exit 1
+fi
+
+mkdir -p "$INSTALL_DIR"
+
+# Check if screenpipe is already installed/running
+if pgrep -f "screenpipe" > /dev/null || [ -f "/Applications/screenpipe.app/Contents/MacOS/screenpipe" ]; then
+    echo "✓ Screenpipe already available"
 else
-    echo "→ Installing screenpipe..."
-    
-    mkdir -p "$INSTALL_DIR"
-    cd "$INSTALL_DIR" || exit 1
-    
-    if ! curl -fSL "$SCREENPIPE_URL" -o screenpipe.tar.gz; then
-        echo "✗ Failed to download screenpipe. Check your internet connection."
-        exit 1
-    fi
-    
-    tar -xzf screenpipe.tar.gz
-    rm screenpipe.tar.gz
-    
-    # Remove quarantine attribute (required for unsigned binaries)
-    echo "→ Removing macOS quarantine attribute (may require password)..."
-    sudo xattr -cr ./screenpipe 2>/dev/null || xattr -cr ./screenpipe
-    
-    chmod +x ./screenpipe
-    SCREENPIPE_CMD="$INSTALL_DIR/screenpipe"
-    echo "✓ Screenpipe installed to $INSTALL_DIR"
+    echo "→ Screenpipe will be started via npx..."
 fi
 
 # Check if Ollama is installed
@@ -109,7 +98,7 @@ rm -rf "$HOME/.automation_audit"
 rm -rf "$HOME/.screenpipe/pipes/sherlock"
 
 echo "✓ Sherlock uninstalled"
-echo "Note: Ollama and its models were not removed. Run 'brew uninstall ollama' if desired."
+echo "Note: Ollama, Node.js, and their data were not removed."
 UNINSTALL_EOF
 chmod +x "$INSTALL_DIR/uninstall.sh"
 
@@ -118,13 +107,9 @@ echo ""
 if pgrep -f "screenpipe" > /dev/null; then
     echo "✓ Screenpipe is already running"
 else
-    echo "→ Starting screenpipe..."
-    if [ -n "$SCREENPIPE_CMD" ]; then
-        nohup $SCREENPIPE_CMD record > "$INSTALL_DIR/screenpipe.log" 2>&1 &
-    else
-        nohup screenpipe record > "$INSTALL_DIR/screenpipe.log" 2>&1 &
-    fi
-    sleep 2
+    echo "→ Starting screenpipe via npx..."
+    nohup npx screenpipe@latest record > "$INSTALL_DIR/screenpipe.log" 2>&1 &
+    sleep 5
     if pgrep -f "screenpipe" > /dev/null; then
         echo "✓ Screenpipe started"
     else

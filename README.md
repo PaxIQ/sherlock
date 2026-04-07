@@ -53,6 +53,7 @@ The client reviews this file and sends it to PaxIQ at their discretion.
 
 ## Requirements
 
+- **Node.js** (v18+) — required for screenpipe
 - 8 GB RAM minimum
 - ~5-10 GB disk space per month
 - macOS, Windows 10/11, or Linux with X11/Wayland

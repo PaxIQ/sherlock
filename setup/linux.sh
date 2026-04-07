@@ -55,6 +55,24 @@ else
     curl -fsSL https://ollama.ai/install.sh | sh
 fi
 
+# Ensure Ollama service is running
+echo ""
+echo "→ Starting Ollama service..."
+if systemctl is-active --quiet ollama 2>/dev/null; then
+    echo "✓ Ollama service already running"
+else
+    # Try systemctl first (systemd), fall back to direct serve
+    if command -v systemctl &> /dev/null && systemctl start ollama 2>/dev/null; then
+        sleep 2
+        echo "✓ Ollama service started"
+    else
+        # Start ollama serve in background if systemd not available
+        nohup ollama serve > /dev/null 2>&1 &
+        sleep 3
+        echo "✓ Ollama started"
+    fi
+fi
+
 # Pull the Gemma model
 echo ""
 echo "→ Pulling Gemma 3 4B model (this may take a few minutes on first run)..."

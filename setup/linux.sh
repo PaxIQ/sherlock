@@ -16,6 +16,29 @@ echo "║                           by PaxIQ                            ║"
 echo "╚═══════════════════════════════════════════════════════════════╝"
 echo ""
 
+# Check for Wayland - it causes screen flash on every capture
+if [ "$XDG_SESSION_TYPE" = "wayland" ]; then
+    echo "╔═══════════════════════════════════════════════════════════════╗"
+    echo "║  ⚠️  WAYLAND DETECTED                                         ║"
+    echo "╠═══════════════════════════════════════════════════════════════╣"
+    echo "║  GNOME Wayland flashes the screen on every screenshot due    ║"
+    echo "║  to a security feature. This makes Sherlock very disruptive. ║"
+    echo "║                                                               ║"
+    echo "║  RECOMMENDED: Log out and select 'GNOME on Xorg' at the      ║"
+    echo "║  login screen (click the gear icon), then run this again.    ║"
+    echo "║                                                               ║"
+    echo "║  To make X11 permanent, edit /etc/gdm3/custom.conf and set:  ║"
+    echo "║    WaylandEnable=false                                        ║"
+    echo "╚═══════════════════════════════════════════════════════════════╝"
+    echo ""
+    read -p "Continue anyway? (y/N): " confirm
+    if [ "$confirm" != "y" ] && [ "$confirm" != "Y" ]; then
+        echo "Setup cancelled. Please switch to X11 and try again."
+        exit 0
+    fi
+    echo ""
+fi
+
 # Check if screenpipe is already installed
 if command -v screenpipe &> /dev/null; then
     echo "✓ Screenpipe already installed"

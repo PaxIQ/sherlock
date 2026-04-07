@@ -1,5 +1,5 @@
 ---
-schedule: daily
+schedule: "0 20 * * *"
 enabled: true
 provider: ollama
 model: gemma3:4b

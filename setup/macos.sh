@@ -148,7 +148,7 @@ echo "╔═══════════════════════�
 echo "║                     SETUP COMPLETE!                           ║"
 echo "╠═══════════════════════════════════════════════════════════════╣"
 echo "║  • Screenpipe is recording your screen activity               ║"
-echo "║  • Analysis runs daily at 5:00 PM                             ║"
+echo "║  • Analysis runs daily at 8:00 PM                             ║"
 echo "║  • Reports saved to: ~/Desktop/AUTOMATION_RECOMMENDATIONS.md  ║"
 echo "║                                                               ║"
 echo "║  PERMISSIONS NEEDED:                                          ║"

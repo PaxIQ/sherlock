@@ -154,7 +154,7 @@ Write-Host "╔═════════════════════�
 Write-Host "║                     SETUP COMPLETE!                           ║" -ForegroundColor Green
 Write-Host "╠═══════════════════════════════════════════════════════════════╣" -ForegroundColor Green
 Write-Host "║  • Screenpipe is recording your screen activity               ║" -ForegroundColor White
-Write-Host "║  • Analysis runs daily at 5:00 PM                             ║" -ForegroundColor White
+Write-Host "║  • Analysis runs daily at 8:00 PM                             ║" -ForegroundColor White
 Write-Host "║  • Reports saved to:                                          ║" -ForegroundColor White
 Write-Host "║    C:\Users\Public\Desktop\AUTOMATION_RECOMMENDATIONS.md      ║" -ForegroundColor White
 Write-Host "║                                                               ║" -ForegroundColor White

@@ -1,0 +1,13 @@
+diff --git a/crates/screenpipe-screen/src/linux_wayland_capture.rs b/crates/screenpipe-screen/src/linux_wayland_capture.rs
+index dde4bd7..5bc547a 100644
+--- a/crates/screenpipe-screen/src/linux_wayland_capture.rs
++++ b/crates/screenpipe-screen/src/linux_wayland_capture.rs
+@@ -19,7 +19,7 @@ use std::sync::{
+     Arc, Mutex,
+ };
+ use std::thread;
+-use xcap::video_recorder::Frame;
++use xcap::Frame;
+ use xcap::Monitor as XcapMonitor;
+ 
+ /// Check if we're running under a Wayland session

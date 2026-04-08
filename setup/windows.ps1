@@ -124,7 +124,7 @@ Query screenpipe for the last 24 hours. Find exactly 3 high-value automation opp
 
 **EXCLUDE:** Personal apps, banking URLs, passwords, SSNs, API keys, credit cards.
 
-Output to C:\Users\Public\Desktop\AUTOMATION_RECOMMENDATIONS.md with: Trigger, Action Steps, Time Saved, Recommended Architecture.
+Append a new dated section to C:\Users\Public\Desktop\AUTOMATION_RECOMMENDATIONS.md (create if it doesn't exist). Never overwrite previous entries. Format each entry with: Report date, Trigger, Action Steps, Time Saved, Recommended Architecture.
 "@
     Set-Content -Path "$PipeDir\pipe.md" -Value $PipeContent
 }

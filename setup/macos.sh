@@ -8,14 +8,6 @@ INSTALL_DIR="$HOME/.automation_audit"
 PIPE_DIR="$HOME/.screenpipe/pipes/sherlock"
 PIPE_URL="https://raw.githubusercontent.com/PaxIQ/sherlock/main/pipe/pipe.md"
 
-# Detect architecture
-ARCH=$(uname -m)
-if [ "$ARCH" = "arm64" ]; then
-    SCREENPIPE_URL="https://github.com/screenpipe/screenpipe/releases/download/cli-latest/screenpipe-0.3.264-aarch64-apple-darwin.tar.gz"
-else
-    SCREENPIPE_URL="https://github.com/screenpipe/screenpipe/releases/download/cli-latest/screenpipe-0.3.264-x86_64-apple-darwin.tar.gz"
-fi
-
 echo ""
 echo "╔═══════════════════════════════════════════════════════════════╗"
 echo "║       Sherlock - Automation Discovery Agent (macOS)          ║"
@@ -23,40 +15,16 @@ echo "║                           by PaxIQ                            ║"
 echo "╚═══════════════════════════════════════════════════════════════╝"
 echo ""
 
-# Check if screenpipe is already installed
-if command -v screenpipe &> /dev/null || [ -f "/Applications/screenpipe.app/Contents/MacOS/screenpipe" ]; then
-    echo "✓ Screenpipe already installed"
-    SCREENPIPE_CMD="screenpipe"
-elif [ -f "$INSTALL_DIR/screenpipe" ]; then
-    echo "✓ Screenpipe already installed"
-    SCREENPIPE_CMD="$INSTALL_DIR/screenpipe"
-else
-    echo "→ Installing screenpipe..."
-    
-    mkdir -p "$INSTALL_DIR"
-    cd "$INSTALL_DIR" || exit 1
-    
-    if ! curl -fSL "$SCREENPIPE_URL" -o screenpipe.tar.gz; then
-        echo "✗ Failed to download screenpipe. Check your internet connection."
-        exit 1
-    fi
-    
-    tar -xzf screenpipe.tar.gz
-    rm screenpipe.tar.gz
-    
-    # Binary is in bin/ subdirectory
-    mv ./bin/screenpipe ./screenpipe 2>/dev/null || true
-    mv ./bin/mlx.metallib ./mlx.metallib 2>/dev/null || true
-    rm -rf ./bin 2>/dev/null || true
-    
-    # Remove quarantine attribute (required for unsigned binaries)
-    echo "→ Removing macOS quarantine attribute (may require password)..."
-    sudo xattr -cr . 2>/dev/null || xattr -cr .
-    
-    chmod +x ./screenpipe
-    SCREENPIPE_CMD="$INSTALL_DIR/screenpipe"
-    echo "✓ Screenpipe installed to $INSTALL_DIR"
+# Check if Node.js / npx is available (required for screenpipe)
+if ! command -v npx &> /dev/null; then
+    echo "✗ Node.js not found. Please install it from https://nodejs.org and re-run this script."
+    open "https://nodejs.org"
+    exit 1
 fi
+
+# screenpipe is now run via npx — no binary download needed
+SCREENPIPE_CMD="npx screenpipe@latest"
+echo "✓ Screenpipe will run via npx (screenpipe@latest)"
 
 # Check if Ollama is installed
 echo ""
@@ -134,7 +102,7 @@ if pgrep -f "screenpipe" > /dev/null; then
     echo "✓ Screenpipe is already running"
 else
     echo "→ Starting screenpipe..."
-    nohup $SCREENPIPE_CMD record > "$INSTALL_DIR/screenpipe.log" 2>&1 &
+    nohup npx screenpipe@latest record > "$INSTALL_DIR/screenpipe.log" 2>&1 &
     sleep 2
     if pgrep -f "screenpipe" > /dev/null; then
         echo "✓ Screenpipe started"

@@ -7,7 +7,6 @@ $ErrorActionPreference = "Stop"
 
 $InstallDir = "$env:USERPROFILE\AutomationAudit"
 $PipeDir = "$env:USERPROFILE\.screenpipe\pipes\sherlock"
-$ScreenpipeUrl = "https://github.com/screenpipe/screenpipe/releases/download/cli-latest/screenpipe-0.3.264-x86_64-pc-windows-msvc.zip"
 $PipeUrl = "https://raw.githubusercontent.com/PaxIQ/sherlock/main/pipe/pipe.md"
 
 Write-Host ""
@@ -23,43 +22,16 @@ if (-not $isAdmin) {
     Write-Host "⚠ Running without admin privileges. Some features may be limited." -ForegroundColor Yellow
 }
 
-# Check if screenpipe is installed
-$screenpipeCmd = $null
-if (Get-Command screenpipe -ErrorAction SilentlyContinue) {
-    Write-Host "✓ Screenpipe already installed" -ForegroundColor Green
-    $screenpipeCmd = "screenpipe"
-} elseif (Test-Path "$InstallDir\screenpipe.exe") {
-    Write-Host "✓ Screenpipe already installed" -ForegroundColor Green
-    $screenpipeCmd = "$InstallDir\screenpipe.exe"
-} else {
-    Write-Host "→ Installing screenpipe..." -ForegroundColor Yellow
-    
-    New-Item -ItemType Directory -Force -Path $InstallDir | Out-Null
-    Set-Location -Path $InstallDir
-    
-    try {
-        Invoke-WebRequest -Uri $ScreenpipeUrl -OutFile "screenpipe.zip" -UseBasicParsing
-    } catch {
-        Write-Host "✗ Failed to download screenpipe. Check your internet connection." -ForegroundColor Red
-        exit 1
-    }
-    
-    Expand-Archive -Path "screenpipe.zip" -DestinationPath "." -Force
-    Remove-Item "screenpipe.zip"
-    
-    # Binary is in bin\ subdirectory - move contents up
-    if (Test-Path "$InstallDir\bin") {
-        Get-ChildItem -Path "$InstallDir\bin\*" | Move-Item -Destination $InstallDir -Force
-        Remove-Item -Path "$InstallDir\bin" -Recurse -Force
-    }
-    
-    # Unblock downloaded files (prevents SmartScreen warnings)
-    Write-Host "→ Unblocking downloaded files..." -ForegroundColor Yellow
-    Get-ChildItem -Path $InstallDir -Recurse | Unblock-File -ErrorAction SilentlyContinue
-    
-    $screenpipeCmd = "$InstallDir\screenpipe.exe"
-    Write-Host "✓ Screenpipe installed to $InstallDir" -ForegroundColor Green
+# Check if Node.js / npx is available (required for screenpipe)
+if (-not (Get-Command npx -ErrorAction SilentlyContinue)) {
+    Write-Host "✗ Node.js not found. Please install it from https://nodejs.org and re-run this script." -ForegroundColor Red
+    Start-Process "https://nodejs.org"
+    exit 1
 }
+
+# screenpipe is now run via npx — no binary download needed
+$screenpipeCmd = "npx screenpipe@latest"
+Write-Host "✓ Screenpipe will run via npx (screenpipe@latest)" -ForegroundColor Green
 
 # Check if Ollama is installed
 Write-Host ""
@@ -139,8 +111,8 @@ if ($screenpipeProcess) {
     Write-Host "✓ Screenpipe is already running" -ForegroundColor Green
 } else {
     Write-Host "→ Starting screenpipe..." -ForegroundColor Yellow
-    Start-Process -FilePath $screenpipeCmd -ArgumentList "record" -WindowStyle Hidden
-    Start-Sleep -Seconds 2
+    Start-Process -FilePath "npx" -ArgumentList "screenpipe@latest record" -WindowStyle Hidden
+    Start-Sleep -Seconds 3
     $screenpipeProcess = Get-Process -Name "screenpipe" -ErrorAction SilentlyContinue
     if ($screenpipeProcess) {
         Write-Host "✓ Screenpipe started" -ForegroundColor Green

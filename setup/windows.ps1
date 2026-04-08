@@ -131,6 +131,35 @@ Append a new dated section to C:\Users\Public\Desktop\AUTOMATION_RECOMMENDATIONS
 
 Write-Host "[OK] Pipe installed to $PipeDir" -ForegroundColor Green
 
+# Privacy: apps and URLs to exclude from capture entirely
+$ignoredWindows = @(
+    # Password managers
+    "1Password", "Bitwarden", "LastPass", "Dashlane", "KeePass", "Keychain",
+    # Banking & finance
+    "Mint", "Quicken", "TurboTax", "H&R Block",
+    # Personal / entertainment
+    "Spotify", "Netflix", "Hulu", "Disney+", "YouTube Music", "Apple Music",
+    # System / irrelevant
+    "Task Manager", "Taskmgr", "Nvidia"
+) -join " --ignored-windows "
+
+$ignoredUrls = @(
+    # Banking
+    "chase.com", "bankofamerica.com", "wellsfargo.com", "citibank.com",
+    "usbank.com", "capitalone.com", "discover.com", "schwab.com",
+    "fidelity.com", "vanguard.com", "tdameritrade.com", "robinhood.com",
+    # Payments
+    "paypal.com", "venmo.com", "cash.app", "zelle.com",
+    # Healthcare
+    "mychart.com", "epic.com", "healthgrades.com",
+    # Password managers / auth
+    "1password.com", "bitwarden.com", "lastpass.com", "dashlane.com",
+    # Adult content
+    "onlyfans.com", "pornhub.com"
+) -join " --ignored-urls "
+
+$screenpipeArgs = "record --use-pii-removal --ignore-incognito-windows --ignored-windows $ignoredWindows --ignored-urls $ignoredUrls"
+
 # Start screenpipe if not running
 Write-Host ""
 $screenpipeProcess = Get-Process -Name "screenpipe" -ErrorAction SilentlyContinue
@@ -138,7 +167,7 @@ if ($screenpipeProcess) {
     Write-Host "[OK] Screenpipe is already running" -ForegroundColor Green
 } else {
     Write-Host "[ ] Starting screenpipe..." -ForegroundColor Yellow
-    Start-Process -FilePath $screenpipeCmd -ArgumentList "record" -WindowStyle Minimized
+    Start-Process -FilePath $screenpipeCmd -ArgumentList $screenpipeArgs -WindowStyle Minimized
     Start-Sleep -Seconds 3
     $screenpipeProcess = Get-Process -Name "screenpipe" -ErrorAction SilentlyContinue
     if ($screenpipeProcess) {

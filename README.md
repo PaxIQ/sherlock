@@ -36,12 +36,34 @@ The discovery pipe looks for three patterns:
 2. **Repeated URL Visits** — Same internal portal, same click sequence
 3. **Standardized Responses** — Similar emails/messages triggered by keywords
 
-## Privacy Exclusions
+## Privacy & Data Filtering
 
-The local LLM is instructed to ignore:
-- Personal apps (Spotify, Apple Music, etc.)
-- Banking/financial URLs
-- Content containing: password, SSN, confidential, credit card patterns, API keys
+Sherlock applies privacy protection at **two distinct layers**:
+
+### Layer 1 — Capture exclusions (before data is stored)
+
+These apps and URLs are never recorded in the first place:
+
+| Category | Examples |
+|----------|---------|
+| Password managers | 1Password, Bitwarden, LastPass, Dashlane, KeePass |
+| Banking & finance | Chase, Bank of America, Wells Fargo, Fidelity, Schwab, PayPal, Venmo |
+| Healthcare | MyChart, Epic |
+| Entertainment | Spotify, Netflix, Apple Music |
+| Private browsing | All incognito/private browser windows |
+
+In addition, screenpipe's built-in PII removal is enabled, which redacts SSNs, credit card numbers, and similar patterns from audio transcriptions before storage.
+
+### Layer 2 — Report exclusions (before the summary is written)
+
+Even if something slips through capture, the AI agent is instructed not to include findings involving:
+- Passwords, API keys, bearer tokens
+- SSNs, credit card patterns, healthcare data
+- Personal apps, banking URLs, confidential-marked content
+
+### What this means in practice
+
+The raw SQLite database (`~/.screenpipe/db.sqlite`) contains everything that wasn't excluded at Layer 1. Only the client has access to this file — it never leaves their machine. The summary report they share with PaxIQ is filtered at both layers.
 
 ## Output
 

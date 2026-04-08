@@ -131,13 +131,49 @@ echo "Note: Ollama and its models were not removed. Run 'brew uninstall ollama' 
 UNINSTALL_EOF
 chmod +x "$INSTALL_DIR/uninstall.sh"
 
+# Privacy: apps and URLs to exclude from capture entirely
+IGNORED_WINDOWS_ARGS="\
+  --ignored-windows 1Password \
+  --ignored-windows Bitwarden \
+  --ignored-windows LastPass \
+  --ignored-windows Dashlane \
+  --ignored-windows KeePass \
+  --ignored-windows Keychain \
+  --ignored-windows Mint \
+  --ignored-windows Quicken \
+  --ignored-windows TurboTax \
+  --ignored-windows Spotify \
+  --ignored-windows Netflix \
+  --ignored-windows Apple\ Music"
+
+IGNORED_URLS_ARGS="\
+  --ignored-urls chase.com \
+  --ignored-urls bankofamerica.com \
+  --ignored-urls wellsfargo.com \
+  --ignored-urls citibank.com \
+  --ignored-urls usbank.com \
+  --ignored-urls capitalone.com \
+  --ignored-urls schwab.com \
+  --ignored-urls fidelity.com \
+  --ignored-urls vanguard.com \
+  --ignored-urls paypal.com \
+  --ignored-urls venmo.com \
+  --ignored-urls cash.app \
+  --ignored-urls mychart.com \
+  --ignored-urls 1password.com \
+  --ignored-urls bitwarden.com \
+  --ignored-urls lastpass.com \
+  --ignored-urls onlyfans.com"
+
+SCREENPIPE_ARGS="record --use-pii-removal --ignore-incognito-windows $IGNORED_WINDOWS_ARGS $IGNORED_URLS_ARGS"
+
 # Start screenpipe if not running
 echo ""
 if pgrep -f "screenpipe" > /dev/null; then
     echo "✓ Screenpipe is already running"
 else
     echo "→ Starting screenpipe..."
-    nohup "$SCREENPIPE_CMD" record > "$INSTALL_DIR/screenpipe.log" 2>&1 &
+    nohup "$SCREENPIPE_CMD" $SCREENPIPE_ARGS > "$INSTALL_DIR/screenpipe.log" 2>&1 &
     sleep 2
     if pgrep -f "screenpipe" > /dev/null; then
         echo "✓ Screenpipe started"

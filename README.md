@@ -61,14 +61,19 @@ The client reviews this file and sends it to PaxIQ at their discretion.
 
 ## Uninstall
 
-### macOS/Linux
+### macOS
 ```bash
-~/.automation_audit/uninstall.sh
+curl -sSL https://raw.githubusercontent.com/PaxIQ/sherlock/main/setup/uninstall.sh | bash
 ```
 
-### Windows
+### Windows (PowerShell)
 ```powershell
-& "$env:USERPROFILE\AutomationAudit\uninstall.ps1"
+iwr -useb https://raw.githubusercontent.com/PaxIQ/sherlock/main/setup/uninstall.ps1 | iex
+```
+
+### Linux
+```bash
+curl -sSL https://raw.githubusercontent.com/PaxIQ/sherlock/main/setup/uninstall.sh | bash
 ```
 
 ## License

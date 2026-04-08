@@ -58,11 +58,12 @@ if (Get-Command screenpipe -ErrorAction SilentlyContinue) {
     $extractDir = "$env:TEMP\screenpipe_extract"
     New-Item -ItemType Directory -Force -Path $extractDir | Out-Null
     & tar -xzf $tgzPath -C $extractDir
-    Move-Item -Path "$extractDir\package\bin\screenpipe.exe" -Destination "$InstallDir\screenpipe.exe" -Force
+    # Copy all files from bin\ (exe + required DLLs)
+    Get-ChildItem -Path "$extractDir\package\bin\*" | Move-Item -Destination $InstallDir -Force
     Remove-Item -Path $tgzPath, $extractDir -Recurse -Force -ErrorAction SilentlyContinue
 
-    # Unblock the binary (prevents SmartScreen warnings)
-    Unblock-File -Path "$InstallDir\screenpipe.exe" -ErrorAction SilentlyContinue
+    # Unblock all extracted files (prevents SmartScreen warnings)
+    Get-ChildItem -Path $InstallDir | Unblock-File -ErrorAction SilentlyContinue
 
     $screenpipeCmd = "$InstallDir\screenpipe.exe"
     Write-Host "✓ Screenpipe $screenpipeVersion installed to $InstallDir" -ForegroundColor Green
@@ -153,7 +154,7 @@ if ($screenpipeProcess) {
     Write-Host "✓ Screenpipe is already running" -ForegroundColor Green
 } else {
     Write-Host "→ Starting screenpipe..." -ForegroundColor Yellow
-    Start-Process -FilePath $screenpipeCmd -ArgumentList "record" -WindowStyle Hidden
+    Start-Process -FilePath $screenpipeCmd -ArgumentList "record" -WindowStyle Minimized
     Start-Sleep -Seconds 3
     $screenpipeProcess = Get-Process -Name "screenpipe" -ErrorAction SilentlyContinue
     if ($screenpipeProcess) {

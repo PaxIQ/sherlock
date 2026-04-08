@@ -81,10 +81,17 @@ if (Get-Command ollama -ErrorAction SilentlyContinue) {
     exit 1
 }
 
-# Pull the Gemma model
+# Pull the Gemma model via Ollama REST API (avoids triggering the Ollama desktop UI)
 Write-Host ""
 Write-Host "→ Pulling Gemma 3 4B model (this may take a few minutes on first run)..." -ForegroundColor Yellow
-& ollama pull gemma3:4b
+$ollamaBody = '{"name":"gemma3:4b"}'
+try {
+    Invoke-RestMethod -Uri "http://localhost:11434/api/pull" -Method Post -Body $ollamaBody -ContentType "application/json" -TimeoutSec 600 | Out-Null
+} catch {
+    # Fall back to CLI if API isn't reachable (e.g. service not yet started)
+    Write-Host "  (API not ready, falling back to CLI...)" -ForegroundColor Yellow
+    & ollama pull gemma3:4b
+}
 
 # Install the discovery pipe
 Write-Host ""

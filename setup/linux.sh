@@ -38,17 +38,40 @@ if [ "$XDG_SESSION_TYPE" = "wayland" ]; then
     echo ""
 fi
 
-# Check if Node.js / npx is available (required for screenpipe)
-if ! command -v npx &> /dev/null; then
-    echo "✗ Node.js not found. Please install it and re-run this script."
-    echo "  Ubuntu/Debian: sudo apt install nodejs npm"
-    echo "  Or via nvm:    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash"
-    exit 1
-fi
+# Install screenpipe from npm registry (no Node.js required)
+if command -v screenpipe &> /dev/null; then
+    echo "✓ Screenpipe already installed"
+    SCREENPIPE_CMD="screenpipe"
+elif [ -f "$INSTALL_DIR/screenpipe" ]; then
+    echo "✓ Screenpipe already installed"
+    SCREENPIPE_CMD="$INSTALL_DIR/screenpipe"
+else
+    echo "→ Installing screenpipe..."
+    mkdir -p "$INSTALL_DIR"
 
-# screenpipe is now run via npx — no binary download needed
-SCREENPIPE_CMD="npx screenpipe@latest"
-echo "✓ Screenpipe will run via npx (screenpipe@latest)"
+    # Resolve latest version from npm registry
+    SCREENPIPE_VERSION=$(curl -sf "https://registry.npmjs.org/screenpipe/latest" | python3 -c "import sys,json; print(json.load(sys.stdin)['version'])")
+    if [ -z "$SCREENPIPE_VERSION" ]; then
+        echo "✗ Could not resolve screenpipe version. Check your internet connection."
+        exit 1
+    fi
+    echo "→ Latest version: $SCREENPIPE_VERSION"
+
+    TARBALL_URL="https://registry.npmjs.org/@screenpipe/cli-linux-x64/-/cli-linux-x64-${SCREENPIPE_VERSION}.tgz"
+
+    if ! curl -fSL "$TARBALL_URL" -o /tmp/screenpipe.tgz; then
+        echo "✗ Failed to download screenpipe. Check your internet connection."
+        exit 1
+    fi
+
+    tar -xzf /tmp/screenpipe.tgz -C /tmp
+    mv /tmp/package/bin/screenpipe "$INSTALL_DIR/screenpipe"
+    rm -rf /tmp/screenpipe.tgz /tmp/package
+
+    chmod +x "$INSTALL_DIR/screenpipe"
+    SCREENPIPE_CMD="$INSTALL_DIR/screenpipe"
+    echo "✓ Screenpipe $SCREENPIPE_VERSION installed to $INSTALL_DIR"
+fi
 
 # Check if Ollama is installed
 echo ""
@@ -138,7 +161,7 @@ if pgrep -f "screenpipe" > /dev/null; then
     echo "✓ Screenpipe is already running"
 else
     echo "→ Starting screenpipe..."
-    nohup npx screenpipe@latest record > "$INSTALL_DIR/screenpipe.log" 2>&1 &
+    nohup "$SCREENPIPE_CMD" record > "$INSTALL_DIR/screenpipe.log" 2>&1 &
     sleep 2
     if pgrep -f "screenpipe" > /dev/null; then
         echo "✓ Screenpipe started"

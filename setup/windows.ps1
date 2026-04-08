@@ -22,16 +22,51 @@ if (-not $isAdmin) {
     Write-Host "⚠ Running without admin privileges. Some features may be limited." -ForegroundColor Yellow
 }
 
-# Check if Node.js / npx is available (required for screenpipe)
-if (-not (Get-Command npx -ErrorAction SilentlyContinue)) {
-    Write-Host "✗ Node.js not found. Please install it from https://nodejs.org and re-run this script." -ForegroundColor Red
-    Start-Process "https://nodejs.org"
-    exit 1
-}
+# Install screenpipe from npm registry (no Node.js required)
+$screenpipeCmd = $null
+if (Get-Command screenpipe -ErrorAction SilentlyContinue) {
+    Write-Host "✓ Screenpipe already installed" -ForegroundColor Green
+    $screenpipeCmd = "screenpipe"
+} elseif (Test-Path "$InstallDir\screenpipe.exe") {
+    Write-Host "✓ Screenpipe already installed" -ForegroundColor Green
+    $screenpipeCmd = "$InstallDir\screenpipe.exe"
+} else {
+    Write-Host "→ Installing screenpipe..." -ForegroundColor Yellow
+    New-Item -ItemType Directory -Force -Path $InstallDir | Out-Null
 
-# screenpipe is now run via npx — no binary download needed
-$screenpipeCmd = "npx screenpipe@latest"
-Write-Host "✓ Screenpipe will run via npx (screenpipe@latest)" -ForegroundColor Green
+    # Resolve latest version from npm registry
+    try {
+        $npmMeta = Invoke-RestMethod -Uri "https://registry.npmjs.org/screenpipe/latest" -UseBasicParsing
+        $screenpipeVersion = $npmMeta.version
+    } catch {
+        Write-Host "✗ Could not resolve screenpipe version. Check your internet connection." -ForegroundColor Red
+        exit 1
+    }
+    Write-Host "→ Latest version: $screenpipeVersion" -ForegroundColor Yellow
+
+    $tarballUrl = "https://registry.npmjs.org/@screenpipe/cli-win32-x64/-/cli-win32-x64-${screenpipeVersion}.tgz"
+    $tgzPath = "$env:TEMP\screenpipe.tgz"
+
+    try {
+        Invoke-WebRequest -Uri $tarballUrl -OutFile $tgzPath -UseBasicParsing
+    } catch {
+        Write-Host "✗ Failed to download screenpipe. Check your internet connection." -ForegroundColor Red
+        exit 1
+    }
+
+    # tar is available on Windows 10+ (build 17063+)
+    $extractDir = "$env:TEMP\screenpipe_extract"
+    New-Item -ItemType Directory -Force -Path $extractDir | Out-Null
+    & tar -xzf $tgzPath -C $extractDir
+    Move-Item -Path "$extractDir\package\bin\screenpipe.exe" -Destination "$InstallDir\screenpipe.exe" -Force
+    Remove-Item -Path $tgzPath, $extractDir -Recurse -Force -ErrorAction SilentlyContinue
+
+    # Unblock the binary (prevents SmartScreen warnings)
+    Unblock-File -Path "$InstallDir\screenpipe.exe" -ErrorAction SilentlyContinue
+
+    $screenpipeCmd = "$InstallDir\screenpipe.exe"
+    Write-Host "✓ Screenpipe $screenpipeVersion installed to $InstallDir" -ForegroundColor Green
+}
 
 # Check if Ollama is installed
 Write-Host ""
@@ -111,7 +146,7 @@ if ($screenpipeProcess) {
     Write-Host "✓ Screenpipe is already running" -ForegroundColor Green
 } else {
     Write-Host "→ Starting screenpipe..." -ForegroundColor Yellow
-    Start-Process -FilePath "npx" -ArgumentList "screenpipe@latest record" -WindowStyle Hidden
+    Start-Process -FilePath $screenpipeCmd -ArgumentList "record" -WindowStyle Hidden
     Start-Sleep -Seconds 3
     $screenpipeProcess = Get-Process -Name "screenpipe" -ErrorAction SilentlyContinue
     if ($screenpipeProcess) {

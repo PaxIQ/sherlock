@@ -173,3 +173,4 @@ Write-Host "║  To uninstall:                                                �
 Write-Host "║  & `"$InstallDir\uninstall.ps1`"                               ║" -ForegroundColor White
 Write-Host "╚═══════════════════════════════════════════════════════════════╝" -ForegroundColor Green
 Write-Host ""
+Read-Host "Press Enter to exit"

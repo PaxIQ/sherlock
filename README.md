@@ -42,17 +42,23 @@ Sherlock applies privacy protection at **two distinct layers**:
 
 ### Layer 1 — Capture exclusions (before data is stored)
 
-These apps and URLs are never recorded in the first place:
+These apps and URLs are never recorded in the first place. The full list is maintained in [`config/privacy.yml`](config/privacy.yml).
 
 | Category | Examples |
 |----------|---------|
-| Password managers | 1Password, Bitwarden, LastPass, Dashlane, KeePass |
-| Banking & finance | Chase, Bank of America, Wells Fargo, Fidelity, Schwab, PayPal, Venmo |
-| Healthcare | MyChart, Epic |
-| Entertainment | Spotify, Netflix, Apple Music |
+| Password managers | 1Password, Bitwarden, LastPass, Dashlane, KeePass, Keeper, NordPass |
+| Banking & finance | Chase, BofA, Wells Fargo, Citi, Capital One, Fidelity, Schwab, PayPal, Venmo, Coinbase |
+| Healthcare | MyChart, Epic, CVS, Walgreens |
+| Tax & finance tools | TurboTax, H&R Block, Mint, YNAB |
+| Entertainment | Spotify, Netflix, Apple Music, Hulu, Disney+ |
+| Personal communication | Signal, WhatsApp, Telegram, FaceTime |
 | Private browsing | All incognito/private browser windows |
 
 In addition, screenpipe's built-in PII removal is enabled, which redacts SSNs, credit card numbers, and similar patterns from audio transcriptions before storage.
+
+### Data retention
+
+Sherlock configures screenpipe to **automatically delete all data older than 7 days** — screenshots, OCR text, and audio transcriptions. This limits how much historical data sits on the client's machine at any given time.
 
 ### Layer 2 — Report exclusions (before the summary is written)
 

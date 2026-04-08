@@ -207,6 +207,17 @@ else
 fi
 
 echo ""
+# Enable 7-day data retention via screenpipe REST API
+echo "→ Configuring 7-day data retention..."
+sleep 3  # give screenpipe a moment to start its API
+if curl -sf -X POST "http://localhost:3030/retention/configure" \
+    -H "Content-Type: application/json" \
+    -d '{"enabled":true,"retention_days":7}' > /dev/null 2>&1; then
+    echo "✓ Retention set: data older than 7 days will be auto-deleted"
+else
+    echo "⚠ Could not configure retention (screenpipe may still be starting). You can set this later."
+fi
+
 echo "╔═══════════════════════════════════════════════════════════════╗"
 echo "║                     SETUP COMPLETE!                           ║"
 echo "╠═══════════════════════════════════════════════════════════════╣"

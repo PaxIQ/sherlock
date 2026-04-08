@@ -1,0 +1,147 @@
+# Sherlock Privacy Configuration
+# ================================
+# These lists define what is NEVER captured and stored.
+# All entries use partial/contains matching (case-insensitive).
+#
+# To add an app or URL, submit a PR or ask your PaxIQ consultant.
+
+# ---------------------------------------------------------------------------
+# ignored_windows
+# App names and window titles to exclude from screen capture entirely.
+# ---------------------------------------------------------------------------
+ignored_windows:
+
+  # Password managers
+  - 1Password
+  - Bitwarden
+  - LastPass
+  - Dashlane
+  - KeePass
+  - Keychain Access
+  - Keeper
+  - NordPass
+  - RoboForm
+  - Enpass
+
+  # Banking & financial institutions
+  - Chase
+  - Bank of America
+  - Wells Fargo
+  - Citi
+  - US Bank
+  - Capital One
+  - Discover
+  - TD Bank
+  - PNC Bank
+  - Ally Bank
+  - Navy Federal
+  - USAA
+  - Schwab
+  - Fidelity
+  - Vanguard
+  - TD Ameritrade
+  - E*TRADE
+  - Robinhood
+  - Coinbase
+  - Mint
+  - Quicken
+  - YNAB
+  - TurboTax
+  - H&R Block
+
+  # Healthcare
+  - MyChart
+  - Epic
+  - WebMD
+  - CVS
+  - Walgreens
+
+  # Entertainment / personal
+  - Spotify
+  - Netflix
+  - Hulu
+  - Disney+
+  - Apple Music
+  - YouTube Music
+  - Tidal
+  - Pandora
+  - Prime Video
+
+  # Communication (personal)
+  - FaceTime
+  - WhatsApp
+  - Signal
+  - Telegram
+
+  # System utilities (no useful work content)
+  - Task Manager
+  - Taskmgr
+  - Activity Monitor
+  - System Preferences
+  - System Settings
+
+# ---------------------------------------------------------------------------
+# ignored_urls
+# Browser URLs to exclude from capture. Partial match on domain.
+# ---------------------------------------------------------------------------
+ignored_urls:
+
+  # Banking
+  - chase.com
+  - bankofamerica.com
+  - wellsfargo.com
+  - citibank.com
+  - citi.com
+  - usbank.com
+  - capitalone.com
+  - discover.com
+  - tdbank.com
+  - pnc.com
+  - ally.com
+  - navyfederal.org
+  - usaa.com
+
+  # Investments & crypto
+  - schwab.com
+  - fidelity.com
+  - vanguard.com
+  - tdameritrade.com
+  - etrade.com
+  - robinhood.com
+  - coinbase.com
+  - binance.com
+  - kraken.com
+
+  # Payments
+  - paypal.com
+  - venmo.com
+  - cash.app
+  - zelle.com
+  - stripe.com/dashboard
+
+  # Tax & finance tools
+  - turbotax.com
+  - hrblock.com
+  - mint.com
+  - ynab.com
+
+  # Healthcare
+  - mychart.com
+  - epic.com
+  - healthgrades.com
+  - webmd.com
+  - cvs.com
+  - walgreens.com
+
+  # Password managers / auth
+  - 1password.com
+  - bitwarden.com
+  - lastpass.com
+  - dashlane.com
+  - keepersecurity.com
+  - nordpass.com
+
+  # Adult content
+  - onlyfans.com
+  - pornhub.com
+  - xvideos.com

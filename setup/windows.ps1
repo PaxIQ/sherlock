@@ -178,6 +178,17 @@ if ($screenpipeProcess) {
 }
 
 Write-Host ""
+# Enable 7-day data retention via screenpipe REST API
+Write-Host "[ ] Configuring 7-day data retention..." -ForegroundColor Yellow
+Start-Sleep -Seconds 3  # give screenpipe a moment to start its API
+try {
+    $retentionBody = '{"enabled":true,"retention_days":7}'
+    Invoke-RestMethod -Uri "http://localhost:3030/retention/configure" -Method Post -Body $retentionBody -ContentType "application/json" -TimeoutSec 10 | Out-Null
+    Write-Host "[OK] Retention set: data older than 7 days will be auto-deleted" -ForegroundColor Green
+} catch {
+    Write-Host "[!] Could not configure retention (screenpipe may still be starting). You can set this later." -ForegroundColor Yellow
+}
+
 Write-Host "================================================================" -ForegroundColor Green
 Write-Host "                       SETUP COMPLETE!                         " -ForegroundColor Green
 Write-Host "================================================================" -ForegroundColor Green
